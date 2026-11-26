@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%E2%9D%84%3C/text%3E%3C/svg%3E">
+<title>雪夜 · 告白 — 原创 3D 短片</title>
+<style>
+:root { --bar: 7.5vh; --serif: "Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun",serif; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: #05060f; overflow: hidden; color: #fff; font-family: "Noto Sans SC","Microsoft YaHei","PingFang SC",system-ui,sans-serif; user-select: none; -webkit-user-select: none; }
+#stage { position: fixed; inset: 0; }
+#stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+
+.bar { position: fixed; left: 0; right: 0; height: var(--bar); background: #000; z-index: 5; pointer-events: none; transition: transform 1.4s cubic-bezier(.2,.7,.2,1); }
+.bar.top { top: 0; } .bar.bot { bottom: 0; }
+body.intro .bar.top { transform: translateY(-100%); }
+body.intro .bar.bot { transform: translateY(100%); }
+
+#sub { position: fixed; left: 50%; bottom: calc(var(--bar) + 3.4vh); transform: translateX(-50%); z-index: 6; width: min(88vw, 1000px); text-align: center; pointer-events: none; opacity: 0; transition: opacity .12s linear; }
+#sub .who { display: inline-block; font-size: clamp(11px, 1.55vh, 16px); letter-spacing: .5em; text-indent: .5em; padding: .3em .9em; border-radius: 99px; margin-bottom: .8em; border: 1px solid rgba(255,255,255,.28); background: rgba(10,12,32,.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+#sub .who.g { color: #e2d8ff; border-color: rgba(200,180,255,.6); }
+#sub .who.b { color: #c4eef2; border-color: rgba(150,225,235,.6); }
+#sub .txt { font-family: var(--serif); font-size: clamp(18px, 3.2vh, 36px); line-height: 1.65; letter-spacing: .1em; text-shadow: 0 2px 16px rgba(0,0,0,.9), 0 0 3px rgba(0,0,0,.95); }
+
+#title { position: fixed; inset: 0; z-index: 6; display: grid; place-content: center; text-align: center; pointer-events: none; opacity: 0; }
+#title .a { font-family: var(--serif); font-weight: 600; font-size: clamp(38px, 10vh, 108px); line-height: 1.1; letter-spacing: .32em; text-indent: .32em; text-shadow: 0 0 48px rgba(255,190,225,.65), 0 4px 34px rgba(0,0,0,.85); }
+#title .b { margin-top: 1.6em; font-size: clamp(10px, 1.7vh, 17px); letter-spacing: .6em; text-indent: .6em; opacity: .85; text-shadow: 0 2px 12px rgba(0,0,0,.9); }
+#title .c { margin-top: 1.1em; font-size: clamp(11px, 1.6vh, 16px); letter-spacing: .28em; text-indent: .28em; opacity: .62; text-shadow: 0 2px 12px rgba(0,0,0,.9); }
+
+#endHint { position: fixed; left: 50%; bottom: calc(var(--bar) + 3.2vh); transform: translateX(-50%); z-index: 6; pointer-events: none; opacity: 0; transition: opacity 1.2s ease .6s; font-size: clamp(11px, 1.7vh, 16px); letter-spacing: .3em; text-indent: .3em; padding: .7em 1.6em; border-radius: 99px; border: 1px solid rgba(255,255,255,.25); background: rgba(10,12,32,.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); text-shadow: 0 2px 10px rgba(0,0,0,.8); white-space: nowrap; }
+body.ended #endHint { opacity: .85; }
+
+#hud { position: fixed; right: 18px; top: calc(var(--bar) + 12px); z-index: 8; display: flex; gap: 8px; opacity: 0; transition: opacity .35s; }
+body.show-hud #hud, #hud:hover { opacity: 1; }
+body.intro #hud { display: none; }
+#hud button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,255,255,.22); background: rgba(14,16,40,.55); color: #fff; font-size: 15px; cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: background .2s, transform .15s, border-color .2s; }
+#hud button:hover { background: rgba(60,50,110,.7); transform: translateY(-1px); }
+#hud button.on { background: rgba(190,160,255,.35); border-color: rgba(210,190,255,.8); }
+
+#prog { position: fixed; left: 0; right: 0; bottom: 0; height: calc(var(--bar) * .62); z-index: 9; cursor: pointer; }
+body.intro #prog { display: none; }
+#prog .track { position: absolute; left: 4%; right: 4%; bottom: 36%; height: 3px; background: rgba(255,255,255,.16); border-radius: 3px; }
+#prog .track b { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg,#ffb3d1,#c8b6ff); border-radius: 3px; }
+#prog .track b::after { content: ""; position: absolute; right: -5px; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px #f9c; }
+#progTicks u { position: absolute; top: -3px; width: 2px; height: 9px; background: rgba(255,255,255,.35); }
+#prog:hover .track { height: 5px; }
+
+#start { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 55%, rgba(8,10,34,.30), rgba(3,4,14,.84)); transition: opacity .9s ease; }
+#start .box { text-align: center; padding: 0 24px; }
+#start h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(40px, 9vh, 96px); letter-spacing: .34em; text-indent: .34em; text-shadow: 0 0 46px rgba(255,190,225,.6), 0 4px 30px rgba(0,0,0,.8); }
+#start .en { margin-top: 1.2em; font-size: clamp(10px, 1.6vh, 15px); letter-spacing: .6em; text-indent: .6em; opacity: .8; }
+#start button { margin-top: 3.2em; padding: .95em 3.2em; font-size: clamp(14px, 2vh, 19px); letter-spacing: .5em; text-indent: .5em; color: #fff; background: linear-gradient(135deg, rgba(255,150,200,.32), rgba(160,140,255,.32)); border: 1px solid rgba(255,255,255,.5); border-radius: 99px; cursor: pointer; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 0 40px rgba(255,160,210,.25); transition: transform .2s, box-shadow .2s, background .2s; }
+#start button:hover { transform: scale(1.04); box-shadow: 0 0 60px rgba(255,160,210,.5); background: linear-gradient(135deg, rgba(255,150,200,.5), rgba(160,140,255,.5)); }
+#start .keys { margin-top: 2.6em; font-size: clamp(11px, 1.55vh, 14px); line-height: 2; opacity: .6; letter-spacing: .08em; }
+#start .keys kbd { font: inherit; padding: .05em .55em; margin: 0 .15em; border: 1px solid rgba(255,255,255,.35); border-radius: 5px; background: rgba(255,255,255,.07); }
+#start .note { margin-top: 1.2em; font-size: clamp(10px, 1.4vh, 13px); opacity: .42; letter-spacing: .1em; }
+
+#loading, #err { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: #05060f; font-size: 14px; letter-spacing: .4em; color: #cfc6ff; }
+#err { display: none; padding: 40px; text-align: center; letter-spacing: .1em; line-height: 1.8; color: #ffb3c1; }
+</style>
+</head>
+<body class="intro">
+<div id="stage"></div>
+<div class="bar top"></div><div class="bar bot"></div>
+<div id="title"><div class="a"></div><div class="b"></div><div class="c"></div></div>
+<div id="sub"><div class="who g"></div><div class="txt"></div></div>
+<div id="endHint">按 R 重播 · 按 F 自由视角 · ← → 快进退</div>
+<div id="hud">
+  <button id="btnPlay" title="播放/暂停 (空格)">▶</button>
+  <button id="btnReplay" title="重播 (R)">↺</button>
+  <button id="btnFree" title="自由视角 (F):拖动旋转,滚轮缩放">🎥</button>
+  <button id="btnMute" title="静音 (M)">🔊</button>
+  <button id="btnShot" title="截图 (P)">📷</button>
+  <button id="btnFs" title="全屏">⛶</button>
+</div>
+<div id="prog"><div class="track"><b id="progFill"></b><div id="progTicks"></div></div></div>
+<div id="start"><div class="box">
+  <h1>雪夜 · 告白</h1>
+  <div class="en">SNOWY NIGHT · A CONFESSION</div>
+  <button id="btnStart">开 始</button>
+  <div class="keys"><kbd>空格</kbd>暂停 <kbd>R</kbd>重播 <kbd>F</kbd>自由视角(拖动 / 滚轮) <kbd>←</kbd><kbd>→</kbd>快进退 <kbd>[</kbd><kbd>]</kbd>切镜头 <kbd>M</kbd>静音 <kbd>P</kbd>截图</div>
+  <div class="note">原创角色 · 原创台词与配乐 · 浏览器实时 3D 渲染 · 建议戴耳机</div>
+</div></div>
+<div id="loading">LOADING</div>
+<div id="err"></div>
+<!--BUNDLE-->
+</body>
+</html>
